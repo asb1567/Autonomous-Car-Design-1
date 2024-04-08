@@ -4,7 +4,7 @@
 #define MAX_DISTANCE 150
 float UltrasonicSensorData[SONAR_NUM];
 
-#define ledPin 13  //LED 디지털 핀 13번에 연결
+#define ledPin 13  
 #define LINE_DETECT_WHITE  1
 
 NewPing sonar[SONAR_NUM] =
@@ -73,8 +73,8 @@ int Robot_Mode_Define(void)
   }
 }
 
-int linesensor_data[5] = {0,0,0,0,0};  //읽은 값을 저장할 변수
-int linesensor_pin[5] = {2,3,4,5,6};   //int형 배열
+int linesensor_data[5] = {0,0,0,0,0};  
+int linesensor_pin[5] = {2,3,4,5,6};   
 
 int read_digital_line_sensor(void)
 {
@@ -124,11 +124,11 @@ int read_digital_line_sensor(void)
 
 void setup() {
   int i;
-  pinMode(ledPin, OUTPUT);    // 13번 핀 출력으로 설정
+  pinMode(ledPin, OUTPUT);    
 
   for(i=0;i<5;i++)
   {
-      pinMode(linesensor_pin[i], INPUT);      // 라인 센선 핀 입력으로 설정
+      pinMode(linesensor_pin[i], INPUT);      
   }
   
   Serial.begin(9600);
@@ -137,7 +137,7 @@ void setup() {
 void loop() {
   int i;
   int sum = 0;
-  sum = read_digital_line_sensor();  // 함수 실행
+  sum = read_digital_line_sensor();  
 
   Serial.print("Input data = ");
   for(i=0;i<5;i++)
@@ -145,8 +145,8 @@ void loop() {
     Serial.print(linesensor_data[i]);
     Serial.print(" ");
   }
-  Serial.print(sum);  //sum 값 출력
-  Serial.println(" ");  //줄 바꾸기
+  Serial.print(sum);  
+  Serial.println(" ");  
 
   delay(50);
   
