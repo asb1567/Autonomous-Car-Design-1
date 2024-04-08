@@ -1,132 +1,155 @@
-#define LINE_DETECT_WHITE 1
-#define ledPin 13
-
-#define SONAR_NUM 4
-#define MAX_DISTANCE 150 
-
 #include <NewPing.h>
 
-int mode = -1;
+#define SONAR_NUM 4 
+#define MAX_DISTANCE 150
+float UltrasonicSensorData[SONAR_NUM];
 
-float ultrasonicsensor_data[SONAR_NUM];
+#define ledPin 13  //LED 디지털 핀 13번에 연결
+#define LINE_DETECT_WHITE  1
 
-NewPing sonar[SONAR_NUM] = 
+NewPing sonar[SONAR_NUM] =
 {
-  NewPing(8, 8, MAX_DISTANCE),
-  NewPing(9, 9, MAX_DISTANCE),
-  NewPing(10, 10, MAX_DISTANCE),
-  NewPing(11, 11, MAX_DISTANCE),
+  NewPing(8,8,MAX_DISTANCE),
+  NewPing(9,9,MAX_DISTANCE),
+  NewPing(10,10,MAX_DISTANCE),
+  NewPing(11,11,MAX_DISTANCE)
 };
-void read_ultrasonic_sensor(void)
+
+void read_ultransonic_sensor(void)
 {
-  ultrasonicsensor_data[0] = sonar[0].ping_cm();
-  ultrasonicsensor_data[1] = sonar[1].ping_cm();
-  ultrasonicsensor_data[2] = sonar[2].ping_cm();
-  ultrasonicsensor_data[3] = sonar[3].ping_cm();
+  UltrasonicSensorData[0] = sonar[0].ping_cm();
+  UltrasonicSensorData[1] = sonar[1].ping_cm();
+  UltrasonicSensorData[2] = sonar[2].ping_cm();
+  UltrasonicSensorData[3] = sonar[3].ping_cm();
 }
 
-void Sonar_Data_Display(int flag)
+void Sonar_data_display(int flag)
 {
   char Sonar_data_display[40];
-  if(flag == 0) return;
+  if(flag==0) return;
   else
   {
-    sprintf(Sonar_data_display, "F: ");
+    sprintf(Sonar_data_display,"F:");
     Serial.print(Sonar_data_display);
-    Serial.print(ultrasonicsensor_data[0]);
-    Serial.print(" B: ");
-    Serial.print(ultrasonicsensor_data[1]);
-    Serial.print(" R: ");
-    Serial.print(ultrasonicsensor_data[2]);
-    Serial.print(" L: ");
-    Serial.print(ultrasonicsensor_data[3]);
+    Serial.print(UltrasonicSensorData[0]);
+    Serial.print(" B:");
+    Serial.print(UltrasonicSensorData[1]);
+    Serial.print(" R:");
+    Serial.print(UltrasonicSensorData[2]);
+    Serial.print(" L:");
+    Serial.println(UltrasonicSensorData[3]);
   }
 }
 
-void Robot_Mode_Define(void)
+int Robot_Mode_Define(void)
 {
   int i;
-  mode = -1;
-  read_ultrasonic_sensor();
+  int mode = -1;
+  read_ultransonic_sensor();
+  Sonar_data_display(1);
   for(i=0;i<4;i++)
   {
-    if(ultrasonicsensor_data[i] ==0) ultrasonicsensor_data[i] = MAX_DISTANCE;
+    if(UltrasonicSensorData[i] ==0) UltrasonicSensorData[i] = MAX_DISTANCE;
   }
-  Sonar_Data_Display(1);
-
-  if( (ultrasonicsensor_data[2] >= 15) && (ultrasonicsensor_data[3] >= 15) )
+  Sonar_data_display(1);
+  if( (UltrasonicSensorData[2] >= 15) && (UltrasonicSensorData[3] >= 15) )
   {
-    mode = 0;
+    mode =0;
   }
-  if( (ultrasonicsensor_data[2] <= 15) && (ultrasonicsensor_data[3] <= 15) )
+  Sonar_data_display(1);
+  if( (UltrasonicSensorData[2] <= 15) && (UltrasonicSensorData[3] <= 15) )
   {
-    mode = 1;
+    mode =1;
   }
-  if( (ultrasonicsensor_data[3] <= 35) && (ultrasonicsensor_data[2] >= 40) )
+  Sonar_data_display(1);
+  if( (UltrasonicSensorData[3] <= 35) && (UltrasonicSensorData[2] >= 40) )
   {
-    mode = 2;
+    mode =2;
   }
-  if( (ultrasonicsensor_data[2] <= 35) && (ultrasonicsensor_data[3] >= 40) )
+  Sonar_data_display(1);
+  if( (UltrasonicSensorData[2] <= 35) && (UltrasonicSensorData[3] >= 40) )
   {
-    mode = 3;
+    mode =3;
   }
 }
 
-int linesensor_data[5] = {0, 0, 0, 0, 0};
-int linesensor_pin[5] = {2, 3, 4, 5, 6};
+int linesensor_data[5] = {0,0,0,0,0};  //읽은 값을 저장할 변수
+int linesensor_pin[5] = {2,3,4,5,6};   //int형 배열
 
-int read_digital_line_sensor(void){
-  
+int read_digital_line_sensor(void)
+{
   int i;
   int sum = 0;
-  
-  for(i=0;i<5;i++){
-    if(LINE_DETECT_WHITE == 0){
+  for(i=0;i<5;i++)
+  {
+    if(LINE_DETECT_WHITE == 0)
+    {
       linesensor_data[i] = 1 - digitalRead(linesensor_pin[i]);
-      }
-      else{
-        linesensor_data[i] = digitalRead(linesensor_pin[i]);
-      }
-      sum += linesensor_data[i];
     }
+    else
+    {
+      linesensor_data[i] = digitalRead(linesensor_pin[i]);
+    }
+    sum += linesensor_data[i];
+  }
+   
+  if(sum == 5)
+  {
     return sum;
   }
-
-
+  else if(sum == 2)
+  {
+    if( (linesensor_data[3] == 1) && (linesensor_data[4] == 1) ) return 3;
+    if( (linesensor_data[2] == 1) && (linesensor_data[3] == 1) ) return 1;
+    if( (linesensor_data[1] == 1) && (linesensor_data[2] == 1) ) return -1;
+    if( (linesensor_data[0] == 1) && (linesensor_data[1] == 1) ) return -3;
+  }
+  else if(sum == 1)
+  {
+    if((linesensor_data[0] == 1)) return -4;
+    if((linesensor_data[1] == 1)) return -2;
+    if((linesensor_data[2] == 1)) return 0;
+    if((linesensor_data[3] == 1)) return 2;
+    if((linesensor_data[4] == 1)) return 4;
+  }
+  else if(sum == 3)
+  {
+    return -10;
+  }
+  else
+  {
+    return -5;
+  }
+}
 
 void setup() {
-  
   int i;
+  pinMode(ledPin, OUTPUT);    // 13번 핀 출력으로 설정
+
+  for(i=0;i<5;i++)
+  {
+      pinMode(linesensor_pin[i], INPUT);      // 라인 센선 핀 입력으로 설정
+  }
   
-  pinMode(ledPin, OUTPUT);
-  
-  for(i=0;i<5;i++){
-      pinMode(linesensor_pin[i], INPUT);
-    }
   Serial.begin(9600);
 }
 
 void loop() {
-
-  delay(50);                  
-  
   int i;
-  int sum;
+  int sum = 0;
+  sum = read_digital_line_sensor();  // 함수 실행
 
-  sum = read_digital_line_sensor();
+  Serial.print("Input data = ");
+  for(i=0;i<5;i++)
+  {
+    Serial.print(linesensor_data[i]);
+    Serial.print(" ");
+  }
+  Serial.print(sum);  //sum 값 출력
+  Serial.println(" ");  //줄 바꾸기
 
-  Serial.print("Input data =");
+  delay(50);
   
-  Robot_Mode_Define();
-  Serial.println(mode);
-  
-  for(i=0;i<5;i++){
-      Serial.print(linesensor_data[i]);
-      Serial.print("  ");
-    }
-    Serial.println(sum);
-    Serial.println("  ");
-    Serial.print("Ping: ");
-    Serial.print(ultrasonicsensor_data[i]);
-    Serial.println("cm");
+  int mode = Robot_Mode_Define();
+  Serial.print(mode);
 }
